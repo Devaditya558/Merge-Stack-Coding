@@ -1,0 +1,29 @@
+/*Statical API
+API Endpoint: /api/statistics
+Method: GET
+Functionality: Return total sale amount, total number of sold items, and total number of not sold items for the selected month.*/
+app.get('/api/statistics', async (req, res) => {
+    const { month } = req.query;
+
+    let query = {};
+    if (month) {
+        query.dateOfSale = { $regex: new RegExp(month, 'i') };
+    }
+
+    try {
+        const totalSaleAmount = await Transaction.aggregate([
+            { $match: query },
+            { $group: { _id: null, total: { $sum: "$price" } } }
+        ]);
+        const totalSoldItems = await Transaction.countDocuments({ ...query, sold: true });
+        const totalNotSoldItems = await Transaction.countDocuments({ ...query, sold: false });
+
+        res.status(200).json({
+            totalSaleAmount: totalSaleAmount[0]?.total || 0,
+            totalSoldItems,
+            totalNotSoldItems
+        });
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+});
