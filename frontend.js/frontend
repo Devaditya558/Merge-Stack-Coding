@@ -1,0 +1,42 @@
+/*Create a single-page application using React to display a table and charts.
+
+Steps:
+Set up the project:
+
+sh
+Copy code
+npx create-react-app transactions-dashboard
+cd transactions-dashboard
+npm install axios recharts
+Create Components:
+
+TransactionsTable
+TransactionsStatistics
+TransactionsBarChart
+TransactionsPieChart
+Fetch Data from APIs:
+Use axios to make API calls and pass the data to the respective components.
+
+Integrate Components into the App:
+Create a dropdown for month selection and display the table and charts based on the selected month.*/
+// App.js
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import TransactionsTable from './components/TransactionsTable';
+import TransactionsStatistics from './components/TransactionsStatistics';
+import TransactionsBarChart from './components/TransactionsBarChart';
+import TransactionsPieChart from './components/TransactionsPieChart';
+
+function App() {
+    const [month, setMonth] = useState('March');
+    const [transactions, setTransactions] = useState([]);
+    const [statistics, setStatistics] = useState({});
+    const [barChart, setBarChart] = useState([]);
+    const [pieChart, setPieChart] = useState([]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const transactionsResponse = await axios.get(/api/transactions?month=${month});
+            setTransactions(transactionsResponse.data.transactions);
+
+            const statisticsResponse = await axios.get(`/api/stat
