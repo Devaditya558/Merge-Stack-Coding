@@ -1,0 +1,37 @@
+/*List All Transactions with Search and Pagination
+API Endpoint: /api/transactions
+Method: GET
+Functionality: List transactions with optional search and pagination.
+Steps:
+
+Query parameters: month, search, page, perPage.
+Filter by month from dateOfSale.
+Search by title, description, price.
+Implement pagination.*/
+
+app.get('/api/transactions', async (req, res) => {
+    const { month, search, page = 1, perPage = 10 } = req.query;
+
+    let query = {};
+    if (month) {
+        query.dateOfSale = { $regex: new RegExp(month, 'i') };
+    }
+    if (search) {
+        query.$or = [
+            { title: { $regex: new RegExp(search, 'i') } },
+            { description: { $regex: new RegExp(search, 'i') } },
+            { price: { $regex: new RegExp(search, 'i') } }
+        ];
+    }
+
+    try {
+        const transactions = await Transaction.find(query)
+            .skip((page - 1) * perPage)
+            .limit(parseInt(perPage));
+        
+        const count = await Transaction.countDocuments(query);
+        res.status(200).json({ transactions, total: count });
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+});
